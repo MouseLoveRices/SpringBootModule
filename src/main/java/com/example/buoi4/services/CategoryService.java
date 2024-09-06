@@ -2,12 +2,14 @@ package com.example.buoi4.services;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.example.buoi4.dtos.CategoryDTO;
 import com.example.buoi4.model.Category;
 import com.example.buoi4.repositories.CategoryRepository;
-
+import com.example.buoi4.responses.CategoryResponse;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -47,4 +49,11 @@ public class CategoryService implements ICategoryServices{
         return categoryRepository.save(cate);
     }
    
+    @Override
+    public Page<CategoryResponse> getAllCategories(PageRequest pageRequest){
+        return categoryRepository.findAll(pageRequest).map(category->{
+            return CategoryResponse.fromCategory(category);
+        });
+    }
+
 }
