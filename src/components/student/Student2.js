@@ -1,11 +1,11 @@
 import { Button, Container, Table, Alert, Input } from "reactstrap";
 import { useDispatch, useSelector } from 'react-redux';
-import { getAlll, deleteStudent, resetStatusAndMessage, updateStudent } from "../../redux/studentSlice";
+import { getAll, deleteStudent, resetStatusAndMessage } from "../../redux/studentSlice";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import ReactPaginate from 'react-paginate';
 
-export default function Student() {
+export default function Student2() {
     const [currentPage, setCurrentPage] = useState(0);
     const [showMessage, setShowMessage] = useState(false); // Local state to control message visibility
     const handlePageClick = (event) => {
@@ -15,8 +15,10 @@ export default function Student() {
     const { totalPages, students, status, message, error } = useSelector((state) => state.student);
 
     const limit = 5;
+    const navigate = useNavigate();
+
     useEffect(() => {
-        dispatch(getAlll({ currentPage, limit }));
+        dispatch(getAll({ currentPage, limit }));
     }, [currentPage, dispatch]);
 
     useEffect(() => {
@@ -64,38 +66,17 @@ export default function Student() {
     const handle_edit = (id, item) => {
         setStudentEdit({ isEdit: true, id })
         setEStudent(item)
-       
+        console.log("đã edit")
+        console.log(studentEdit)
     }
     const handle_save = (id) => {
-       
-       
-        dispatch(updateStudent({
-            id,
-            student: {
-                ...EStudent,
-                ngaySinh: convertDateToYYYYMMDD(EStudent.ngaySinh), // Sử dụng định dạng YYYY-MM-DD
-                xepLoai: EStudent.xepLoai // Sử dụng giá trị phù hợp với enum
-            }
 
-        })
-
-
-        );
-        setStudentEdit({ isEdit: false, id :""})
+        //dispatch(editProduct({id,product:{...product,category_id:category.id}}))
 
     }
-    const convertDateToYYYYMMDD = (date) => {
-        const [day, month, year] = date.split('-');
-        return `${year}-${month}-${day}`;
-    };
-
-    const convertDateToDDMMYYYY = (date) => {
-        const [year, month, day] = date.split('-');
-        return `${day}-${month}-${year}`;
-    };
     return (
         <div className="products">
-           
+            <h1>isEdit: {studentEdit.isEdit}, id: {studentEdit.id}</h1>
             <Container>
                 {showMessage && (
                     <Alert color={status === 200 ? "success" : "danger"}>
@@ -121,7 +102,7 @@ export default function Student() {
                                 <th scope="row">{index + 1}</th>
                                 <td>
                                     {studentEdit.isEdit && item.id === studentEdit.id ?
-                                        <Input type="hidden" value={EStudent.id} 
+                                        <Input type="text" value={EStudent.id}
                                             onChange={(e) => setEStudent({ ...EStudent, id: e.target.value })}
                                         />
                                         :
@@ -147,33 +128,20 @@ export default function Student() {
                                     }
                                 </td>
                                 <td>
-                                    {
-                                        studentEdit.isEdit && item.id === studentEdit.id ?
-                                            <Input
-                                                type="date"
-                                                value={EStudent.ngaySinh} 
-                                                onChange={(e) => setEStudent({ ...EStudent, ngaySinh: e.target.value })}
-                                            />
-                                            :
-                                            item.ngaySinh
-
+                                    {studentEdit.isEdit && item.id === studentEdit.id ?
+                                        <Input type="text" value={EStudent.ngaySinh}
+                                            onChange={(e) => setEStudent({ ...EStudent, ngaySinh: e.target.value })}
+                                        />
+                                        :
+                                        item.ngaySinh
                                     }
                                 </td>
 
                                 <td>
                                     {studentEdit.isEdit && item.id === studentEdit.id ?
-                                        <Input
-                                            id="xepLoai"
-                                            name="xepLoai"
-                                            type="select"
-                                            value={convertToValue(EStudent.xepLoai)}
+                                        <Input type="text" value={EStudent.xepLoai}
                                             onChange={(e) => setEStudent({ ...EStudent, xepLoai: e.target.value })}
-                                        >
-                                            <option>Gioi</option>
-                                            <option>Kha</option>
-                                            <option>Trung binh</option>
-                                            <option>Yeu</option>
-                                        </Input>
+                                        />
                                         :
                                         convertToValue(item.xepLoai)
                                     }
@@ -197,7 +165,7 @@ export default function Student() {
                                                     <i className="fa-solid fa-delete-left"></i>
                                                 </Button>
                                                 <Button className="btn btn-success" onClick={() => handle_edit(item.id, item)}>
-                                                    <i className="fa-solid fa-pen-to-square"></i>
+                                                    <i class="fa-solid fa-pen-to-square"></i>
                                                 </Button>
                                             </>
                                     }
