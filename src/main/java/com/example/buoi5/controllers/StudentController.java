@@ -10,6 +10,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,18 +18,28 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.util.StringUtils;
 
 import com.example.buoi5.dtos.StudentDTO;
+import com.example.buoi5.dtos.StudentImageDTO;
 import com.example.buoi5.exceptions.ResourceNotFoundException;
 import com.example.buoi5.models.Student;
 import com.example.buoi5.responses.ApiResponse;
 import com.example.buoi5.responses.StudentListResponse;
 import com.example.buoi5.responses.StudentResponse;
 import com.example.buoi5.services.StudentServices;
+
+
 import org.springframework.validation.FieldError;
 import jakarta.validation.Valid;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 
@@ -166,5 +177,79 @@ public class StudentController {
                     .status(HttpStatus.OK.value())
                     .build();
         return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/search4")
+    public ResponseEntity<ApiResponse> search3(@RequestParam int startYear, int endYear){
+        ApiResponse apiResponse = ApiResponse.builder()
+                        .data(studentServices.findByNgaySinhBetween(startYear, endYear))
+                        .message("Search successfully")
+                        .status(HttpStatus.OK.value())
+                        .build();
+        return ResponseEntity.ok(apiResponse);       
+    }
+
+    @GetMapping("/getAllImage/{id}")
+    public ResponseEntity<ApiResponse> getAllImage(@PathVariable long id){
+        ApiResponse apiResponse = ApiResponse.builder()
+                            .data(studentServices.getAllStudentImages(id))
+                            .status(HttpStatus.OK.value())
+                            .message("Get successfully")
+                            .build();
+        return ResponseEntity.ok(apiResponse);  
+    }
+
+    // @PostMapping("/uploads/{id}")
+    // public ResponseEntity<ApiResponse> uploads(@PathVariable Long id, @Valid @RequestBody StudentImageDTO studentImageDTO, BindingResult result){
+    //         if( result.hasErrors()){
+    //             List<String> errors = result.getFieldErrors().stream()
+    //                                     .map(FieldError::getDefaultMessage).toList();
+    //             ApiResponse apiResponse = ApiResponse.builder()
+    //                         .data(errors)
+    //                         .message("Validation failed")
+    //                         .status(HttpStatus.BAD_REQUEST.value())
+    //                         .build();
+    //             return ResponseEntity.badRequest().body(apiResponse);
+    //         }
+    //     ApiResponse apiResponse = ApiResponse.builder()
+    //                     .status(HttpStatus.OK.value())
+    //                     .message("Upload successfully")
+    //                     .data(studentServices.saveStudentImage(id, studentImageDTO))
+    //                     .build();
+    //     return ResponseEntity.ok(apiResponse);                    
+    // }
+
+    @PostMapping(value = "/uploads/{id}")
+public ResponseEntity<ApiResponse> uploads(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws IOException {
+    if (file.isEmpty()) {
+        ApiResponse apiResponse = ApiResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message("Please select a file to upload")
+                .build();
+        return ResponseEntity.badRequest().body(apiResponse);
+    }
+
+    String fileName = storeFile(file);
+    StudentImageDTO studentImageDTO = StudentImageDTO.builder()
+            .imageUrl(fileName)
+            .build();
+    ApiResponse apiResponse = ApiResponse.builder()
+            .status(HttpStatus.OK.value())
+            .message("Upload successfully")
+            .data(studentServices.saveStudentImage(id, studentImageDTO))
+            .build();
+    return ResponseEntity.ok(apiResponse);                                
+}
+
+    private String storeFile(MultipartFile file) throws IOException{
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        String uniqueFileName = UUID.randomUUID().toString()+"_"+fileName;
+        java.nio.file.Path uploadDdir = Paths.get("upload");
+        if(!Files.exists(uploadDdir)){
+            Files.createDirectories(uploadDdir);
+        }
+        java.nio.file.Path destination = Paths.get(uploadDdir.toString(),uniqueFileName);
+        Files.copy(file.getInputStream(),destination,StandardCopyOption.REPLACE_EXISTING);
+        return uniqueFileName;
     }
 }
