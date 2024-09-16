@@ -1,7 +1,7 @@
 import { Button, Container, Table, Alert, Input } from "reactstrap";
 import { useDispatch, useSelector } from 'react-redux';
-import { getAlll, deleteStudent, resetStatusAndMessage, updateStudent } from "../../redux/studentSlice";
-import { useNavigate } from "react-router-dom";
+import { getAlll, deleteStudent, resetStatusAndMessage, updateStudent, searchByName, searchByYear } from "../../redux/studentSlice";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import ReactPaginate from 'react-paginate';
 
@@ -18,6 +18,26 @@ export default function Student() {
     useEffect(() => {
         dispatch(getAlll({ currentPage, limit }));
     }, [currentPage, dispatch]);
+
+    const[startYear,setStartYear]=useState(2000)
+    const[endYear,setEndYear]=useState(2001)
+    const hanldeSearchByYear=()=>{
+        if(startYear&&endYear){
+            dispatch(searchByYear({startYear,endYear}))
+        }
+    }
+
+    ///////
+  const searchResult = useSelector(state=>state.student.searchResult)
+  const [searchQuery,setSearchQuery] = useState('')
+
+
+  const handleSearch=()=>{
+    if(searchQuery.trim()){
+      dispatch(searchByName(searchQuery))
+    }
+  }
+  //////
 
     useEffect(() => {
         if (status && message) {
@@ -102,7 +122,18 @@ export default function Student() {
                         {message}
                     </Alert>
                 )}
-
+                <Input placeholder="Search by name or city" value={searchQuery} onChange={e=>{setSearchQuery(e.target.value)}}
+                    onKeyDown={(e)=>{
+                        if(e.key === 'Enter'){
+                            handleSearch();
+                        }
+                    }}
+                />
+                <Container style={{display:"flex"}}>
+                    <Input onChange={(e)=>{setStartYear(e.target.value)}} value={startYear} placeholder="Start year"/>
+                    <Input onChange={(e)=>{setEndYear(e.target.value)}} value={endYear} placeholder="End year"/>  
+                    <Button onClick={hanldeSearchByYear}>Search by year</Button>
+                </Container> 
                 <Table hover>
                     <thead>
                         <tr>
@@ -116,7 +147,7 @@ export default function Student() {
                         </tr>
                     </thead>
                     <tbody>
-                        {students && students.map((item, index) => (
+                        {(searchResult.length>0?searchResult:students).map((item, index) => (
                             <tr key={index} className={studentEdit.isEdit && item.id === studentEdit.id ? "student-item active" : "student-item"}>
                                 <th scope="row">{index + 1}</th>
                                 <td>
@@ -199,6 +230,10 @@ export default function Student() {
                                                 <Button className="btn btn-success" onClick={() => handle_edit(item.id, item)}>
                                                     <i className="fa-solid fa-pen-to-square"></i>
                                                 </Button>
+                                                <Button className="btn btn-success">
+                                                    <Link className='nav-link' to={`/student-detail/${item.id}`}><i className="fa-solid fa-circle-info"></i></Link>
+                                                </Button>
+                                                
                                             </>
                                     }
                                 </td>

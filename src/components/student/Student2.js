@@ -17,6 +17,19 @@ export default function Student2() {
     const limit = 5;
     const navigate = useNavigate();
 
+
+     ///////
+  const searchResult = useSelector(state=>state.student.searchResult)
+  const [searchQuery,setSearchQuery] = useState('')
+
+
+  const handleSearch=()=>{
+    if(searchQuery.trim()){
+      dispatch(searchByName(searchQuery))
+    }
+  }
+  //////
+
     useEffect(() => {
         dispatch(getAll({ currentPage, limit }));
     }, [currentPage, dispatch]);
@@ -83,7 +96,13 @@ export default function Student2() {
                         {message}
                     </Alert>
                 )}
-
+                <Input placeholder="Search by name" value={searchQuery} onChange={e=>{setSearchQuery(e.target.value)}}
+                    onKeyDown={(e)=>{
+                        if(e.key === 'Enter'){
+                            handleSearch();
+                        }
+                    }}
+                /> 
                 <Table hover>
                     <thead>
                         <tr>
@@ -97,7 +116,7 @@ export default function Student2() {
                         </tr>
                     </thead>
                     <tbody>
-                        {students && students.map((item, index) => (
+                        {searchQuery && students.map((item, index) => (
                             <tr key={index} className={studentEdit.isEdit && item.id === studentEdit.id ? "student-item active" : "student-item"}>
                                 <th scope="row">{index + 1}</th>
                                 <td>

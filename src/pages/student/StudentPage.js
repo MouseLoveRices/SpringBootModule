@@ -17,7 +17,6 @@ export default function StudentPage() {
   });
 
   const {status,message, error}= useSelector(state => state.student);
-
   const dispatch = useDispatch();
 
   const toggle = () => 
