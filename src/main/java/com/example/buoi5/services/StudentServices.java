@@ -30,6 +30,11 @@ public class StudentServices implements IStudentServices{
     }
 
     @Override
+    public StudentImage getImageById(Long id){
+        return studentImageRepository.findById(id).orElseThrow(()->new RuntimeException("Khong tim thay image"));
+    }
+
+    @Override
     public Page<StudentResponse> getStudents(Pageable pageable) {
         return studentRepository.findAll(pageable)
             .map(StudentResponse::fromStudent);
@@ -96,12 +101,12 @@ public class StudentServices implements IStudentServices{
         Student student = getStudentById(studentId);
         StudentImage studentImage = StudentImage.builder()
                         .student(student)
-                        .iamgeUrl(studentImageDTO.getImageUrl())
+                        .imageUrl(studentImageDTO.getImageUrl())
                         .build();
         
         int size = studentImageRepository.findByStudentId(studentId).size();
         if(size>=4){
-            throw new InvalidParameterException("Moix sin hvien chi co the toi da 4 hinh");
+            throw new InvalidParameterException("Moi sinh vien chi co the toi da 4 hinh");
 
         }
         return studentImageRepository.save(studentImage);
@@ -110,6 +115,11 @@ public class StudentServices implements IStudentServices{
     @Override
     public List<StudentImage> getAllStudentImages(Long studentId){
         return studentImageRepository.findByStudentId(studentId);
+    }
+
+    @Override
+    public void deleteImage(Long id){
+        studentImageRepository.deleteById(id);
     }
 
 

@@ -30,5 +30,5 @@ public class StudentImage {
     @JoinColumn(name = "student_id")
     private Student student;
     @Column(name="image_url",length = 300)
-    private String iamgeUrl;
+    private String imageUrl;
 }

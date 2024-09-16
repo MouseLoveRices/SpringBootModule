@@ -2,15 +2,16 @@ package com.example.buoi5.controllers;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -25,6 +26,7 @@ import com.example.buoi5.dtos.StudentDTO;
 import com.example.buoi5.dtos.StudentImageDTO;
 import com.example.buoi5.exceptions.ResourceNotFoundException;
 import com.example.buoi5.models.Student;
+import com.example.buoi5.models.StudentImage;
 import com.example.buoi5.responses.ApiResponse;
 import com.example.buoi5.responses.StudentListResponse;
 import com.example.buoi5.responses.StudentResponse;
@@ -149,6 +151,22 @@ public class StudentController {
         return ResponseEntity.ok(apiResponse);
     }
 
+    @DeleteMapping("/images/{id}")
+    public ResponseEntity<ApiResponse> deleteImage(@PathVariable Long id){
+        StudentImage student = studentServices.getImageById(id);
+        if(student == null){
+            throw new ResourceNotFoundException("Khong tim thay hinh anh voi id: "+id);
+        }
+        studentServices.deleteImage(id);
+        ApiResponse apiResponse = ApiResponse.builder()
+                        .data(null)
+                        .message("delete successfully")
+                        .status(HttpStatus.OK.value())
+                        .build();
+        return ResponseEntity.ok(apiResponse);
+    }
+
+
     @GetMapping("/search1")
     public ResponseEntity<ApiResponse> search1(@RequestParam String name){
         ApiResponse apiResponse = ApiResponse.builder()
@@ -251,5 +269,25 @@ public ResponseEntity<ApiResponse> uploads(@PathVariable Long id, @RequestParam(
         java.nio.file.Path destination = Paths.get(uploadDdir.toString(),uniqueFileName);
         Files.copy(file.getInputStream(),destination,StandardCopyOption.REPLACE_EXISTING);
         return uniqueFileName;
+    }
+
+    @GetMapping("/images/{imageName}")
+    public ResponseEntity<?> viewImage(@PathVariable String imageName){
+        try {
+            java.nio.file.Path imagePath = Paths.get("upload/"+imageName);
+            UrlResource resource = new UrlResource(imagePath.toUri());
+            
+            if(resource.exists()){
+                return ResponseEntity.ok()
+                                .contentType(MediaType.IMAGE_JPEG)
+                                .body(resource);
+            }else{
+                return ResponseEntity.ok()
+                                .contentType(MediaType.IMAGE_JPEG)
+                                .body(new UrlResource(Paths.get("upload/notfound.jpeg").toUri()));
+            } 
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

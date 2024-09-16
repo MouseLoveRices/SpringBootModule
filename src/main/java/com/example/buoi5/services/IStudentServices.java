@@ -12,6 +12,7 @@ import com.example.buoi5.responses.StudentResponse;
 
 public interface IStudentServices {
     Student getStudentById(Long id);
+    StudentImage getImageById(Long id);
     Page<StudentResponse> getStudents(Pageable pageable);
     List<Student> getStudent();
     Student saveStudent(StudentDTO StudentDTO);
@@ -24,4 +25,5 @@ public interface IStudentServices {
     // List<Student> searchStudents(XepLoai xepLoai, String ten, int startYear, int endYear);
     StudentImage saveStudentImage(Long studentId, StudentImageDTO studentImageDTO);
     List<StudentImage> getAllStudentImages(Long studentId);
+    void deleteImage(Long id);
 } 
