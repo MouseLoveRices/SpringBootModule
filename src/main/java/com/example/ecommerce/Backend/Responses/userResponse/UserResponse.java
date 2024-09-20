@@ -25,7 +25,7 @@ public class UserResponse extends BaseResponse{
         UserResponse userResponse = UserResponse.builder()
                             .userId(user.getUserId())
                             .name(user.getName())
-                            .userName(user.getName())
+                            .userName(user.getUserName())
                             .email(user.getEmail())
                             .phone(user.getPhone())
                             .address(user.getAddress())
